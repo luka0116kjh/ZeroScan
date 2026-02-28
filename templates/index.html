@@ -1,0 +1,385 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Scanner</title>
+    <style>
+        :root {
+            --bg: #05070b;
+            --panel: #0c111a;
+            --panel-2: #101828;
+            --line: #1b2a45;
+            --text: #e6efff;
+            --muted: #90a4c6;
+            --blue: #3b82f6;
+            --blue-soft: #1e40af;
+            --danger: #f87171;
+            --warn: #fbbf24;
+            --ok: #34d399;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, #03050a, #070b13 45%, #04070d);
+            color: var(--text);
+            font-family: "Noto Sans KR", "Segoe UI", sans-serif;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 20px 16px 32px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .sub {
+            margin: 6px 0 18px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .panel {
+            background: linear-gradient(180deg, var(--panel), var(--panel-2));
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .scan-row {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 8px;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid #1f3152;
+            background: #070d18;
+            color: var(--text);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        button {
+            border: 0;
+            background: linear-gradient(180deg, #2563eb, #1d4ed8);
+            color: #eaf1ff;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:disabled { opacity: 0.6; cursor: wait; }
+
+        .status {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .stat {
+            background: #070d17;
+            border: 1px solid #1a2a47;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .value {
+            margin-top: 6px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        h3 {
+            margin: 0 0 8px;
+            font-size: 16px;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 18px;
+            color: #d2def4;
+        }
+
+        li { margin: 5px 0; }
+
+        .pill {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 0 6px 6px 0;
+            border: 1px solid #28467a;
+            border-radius: 999px;
+            font-size: 12px;
+            color: #c6dbff;
+            background: #081228;
+        }
+
+        .logs {
+            min-height: 220px;
+            max-height: 280px;
+            overflow: auto;
+            background: #03070f;
+            border: 1px solid #182a4a;
+            border-radius: 8px;
+            padding: 10px;
+            white-space: pre-wrap;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #bfd6ff;
+        }
+
+        .sev-high { color: var(--danger); }
+        .sev-medium { color: var(--warn); }
+        .sev-low { color: var(--ok); }
+
+        @media (max-width: 900px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .grid { grid-template-columns: 1fr; }
+            .scan-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Security Scanner v6</h1>
+        <p class="sub">상태 점검, 헤더 분석, 점수, AI 설명, 로그 분석, 학습 추천</p>
+
+        <section class="panel">
+            <div class="scan-row">
+                <input id="urlInput" type="text" placeholder="예: example.com 또는 https://example.com">
+                <button id="scanBtn" onclick="startScan()">스캔</button>
+            </div>
+            <div id="statusText" class="status">대기 중</div>
+        </section>
+
+        <section class="panel">
+            <div class="stats">
+                <div class="stat"><div class="label">Score</div><div class="value" id="scoreValue">-</div></div>
+                <div class="stat"><div class="label">Grade</div><div class="value" id="gradeValue">-</div></div>
+                <div class="stat"><div class="label">HTTP</div><div class="value" id="httpValue">-</div></div>
+                <div class="stat"><div class="label">Time</div><div class="value" id="timeValue">-</div></div>
+            </div>
+        </section>
+
+        <section class="grid">
+            <div class="panel">
+                <h3>AI 설명</h3>
+                <p id="aiOverview" class="sub" style="margin-top:0;">아직 스캔 결과가 없습니다.</p>
+                <strong>강점</strong>
+                <ul id="aiPositives"></ul>
+                <strong>위험</strong>
+                <ul id="aiRisks"></ul>
+                <strong>우선 조치</strong>
+                <ul id="aiActions"></ul>
+            </div>
+            <div class="panel">
+                <h3>로그 분석 요약</h3>
+                <div id="sumTotal" class="sub" style="margin:0 0 4px;">Total scans: -</div>
+                <div id="sumAvg" class="sub" style="margin:0 0 4px;">Average score: -</div>
+                <div id="sumLast" class="sub" style="margin:0 0 8px;">Last scan: -</div>
+                <div id="sumGrades"></div>
+                <div id="sumMissing"></div>
+            </div>
+        </section>
+
+        <section class="grid">
+            <div class="panel">
+                <h3>Findings</h3>
+                <ul id="findings"></ul>
+            </div>
+            <div class="panel">
+                <h3>실시간 로그</h3>
+                <div class="logs" id="logArea">결과 로그가 여기에 표시됩니다.</div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h3>학습 추천</h3>
+            <div id="learningPath"></div>
+        </section>
+    </div>
+
+    <script>
+        function setText(id, text) {
+            document.getElementById(id).innerText = text;
+        }
+
+        function renderList(id, items) {
+            const el = document.getElementById(id);
+            el.innerHTML = '';
+            if (!items || items.length === 0) {
+                el.innerHTML = '<li>-</li>';
+                return;
+            }
+            items.forEach((item) => {
+                const li = document.createElement('li');
+                li.innerText = item;
+                el.appendChild(li);
+            });
+        }
+
+        function renderFindings(findings) {
+            const el = document.getElementById('findings');
+            el.innerHTML = '';
+            if (!findings || findings.length === 0) {
+                el.innerHTML = '<li>중요 이슈가 감지되지 않았습니다.</li>';
+                return;
+            }
+            findings.forEach((f) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="sev-${f.severity}">[${f.severity.toUpperCase()}]</span> ${f.item}: ${f.message}`;
+                el.appendChild(li);
+            });
+        }
+
+        function renderAI(ai) {
+            if (!ai) {
+                setText('aiOverview', 'AI 설명 데이터가 없습니다.');
+                renderList('aiPositives', []);
+                renderList('aiRisks', []);
+                renderList('aiActions', []);
+                return;
+            }
+            setText('aiOverview', ai.overview || '-');
+            renderList('aiPositives', ai.positives || []);
+            renderList('aiRisks', ai.risks || []);
+            renderList('aiActions', ai.priority_actions || []);
+        }
+
+        function renderLearning(modules) {
+            const box = document.getElementById('learningPath');
+            box.innerHTML = '';
+            if (!modules || modules.length === 0) {
+                box.innerHTML = '<span class="pill">추천 모듈 없음</span>';
+                return;
+            }
+            modules.forEach((m) => {
+                const row = document.createElement('div');
+                row.style.marginBottom = '8px';
+                row.innerHTML = `<span class="pill">${m.level}</span> <strong>${m.title}</strong> - ${m.summary}`;
+                box.appendChild(row);
+            });
+        }
+
+        function renderLogs(logs) {
+            const el = document.getElementById('logArea');
+            el.innerText = logs && logs.length ? logs.join('\n') : '로그 없음';
+        }
+
+        function renderSummary(summary) {
+            setText('sumTotal', `Total scans: ${summary.total_scans}`);
+            setText('sumAvg', `Average score: ${summary.average_score}`);
+            setText('sumLast', `Last scan: ${summary.last_scan_at || '-'}`);
+
+            const grades = document.getElementById('sumGrades');
+            grades.innerHTML = '';
+            Object.entries(summary.grade_distribution || {}).forEach(([g, c]) => {
+                const p = document.createElement('span');
+                p.className = 'pill';
+                p.innerText = `Grade ${g}: ${c}`;
+                grades.appendChild(p);
+            });
+
+            const missing = document.getElementById('sumMissing');
+            missing.innerHTML = '';
+            (summary.top_missing_headers || []).forEach((h) => {
+                const p = document.createElement('span');
+                p.className = 'pill';
+                p.innerText = `${h.header} (${h.count})`;
+                missing.appendChild(p);
+            });
+            if (!summary.top_missing_headers || summary.top_missing_headers.length === 0) {
+                missing.innerHTML = '<span class="pill">누적 미설정 헤더 없음</span>';
+            }
+        }
+
+        async function loadSummary() {
+            try {
+                const r = await fetch('/api/logs/summary');
+                const data = await r.json();
+                if (data.status === 'success') {
+                    renderSummary(data.summary);
+                }
+            } catch (_) {
+                setText('sumTotal', 'Total scans: summary load failed');
+            }
+        }
+
+        async function startScan() {
+            const url = document.getElementById('urlInput').value.trim();
+            const btn = document.getElementById('scanBtn');
+            const status = document.getElementById('statusText');
+
+            if (!url) {
+                status.innerText = 'URL을 입력하세요.';
+                return;
+            }
+
+            btn.disabled = true;
+            status.innerText = '스캔 진행 중...';
+
+            try {
+                const r = await fetch('/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url }),
+                });
+                const data = await r.json();
+
+                if (data.status !== 'success') {
+                    status.innerText = `[ERROR] ${data.message}`;
+                    return;
+                }
+
+                setText('scoreValue', `${data.score}/100`);
+                setText('gradeValue', data.grade);
+                setText('httpValue', String(data.status_code));
+                setText('timeValue', `${data.response_time_sec}s`);
+                status.innerText = `완료: ${data.final_url}`;
+
+                renderLogs(data.logs);
+                renderFindings(data.findings);
+                renderAI(data.ai_explanation);
+                renderLearning(data.learning_path);
+                await loadSummary();
+            } catch (_) {
+                status.innerText = '[ERROR] 서버 연결 실패';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        loadSummary();
+    </script>
+</body>
+</html>
