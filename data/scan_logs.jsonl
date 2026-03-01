@@ -1,0 +1,1 @@
+{"scan_id": "cfd26dcf-f5fa-4225-a8f5-d00d1e105ba1", "timestamp": "2026-03-01T07:05:21.510059+00:00", "target_url": "https://github.com/luka0116kjh/ZeroScan", "final_url": "https://github.com/luka0116kjh/ZeroScan", "status_code": 200, "response_time_sec": 2.604, "score": 89, "grade": "B", "missing_headers": ["Permissions-Policy"]}
