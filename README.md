@@ -1,6 +1,7 @@
 # Web Security Scanner (Vaccine)
 
-[English](README.md) | [한국어](README_KR.md)
+[![English](https://img.shields.io/badge/lang-English-blue?style=flat-square)](README.md)
+[![Korean](https://img.shields.io/badge/lang-한국어-red?style=flat-square)](README.ko.md)
 
 A Flask-based web security auditing tool that analyzes target URLs for security headers, HTTPS enforcement, and general performance metrics. It provides an automated "AI-style" explanation and suggests learning modules based on the results.
 
