@@ -31,7 +31,7 @@ pip install flask requests
 ### 2. 서버 실행
 
 ```powershell
-python app.py
+python .\백신\app.py
 ```
 
 기본적으로 `http://127.0.0.1:5000`에서 서버가 구동됩니다.

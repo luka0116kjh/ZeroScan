@@ -31,7 +31,7 @@ pip install flask requests
 ### 2. Run the Application
 
 ```powershell
-python app.py
+python .\백신\app.py
 ```
 
 The server will be available at `http://127.0.0.1:5000` (default Flask port).
