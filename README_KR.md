@@ -1,7 +1,7 @@
 # 웹 보안 스캐너 (백신)
 
 [![English](https://img.shields.io/badge/lang-English-blue?style=flat-square)](README.md)
-[![Korean](https://img.shields.io/badge/lang-한국어-red?style=flat-square)](README.ko.md)
+[![Korean](https://img.shields.io/badge/lang-한국어-red?style=flat-square)](README_KR.md)
 
 Flask 기반의 웹 보안 감사 도구로, 대상 URL의 보안 헤더, HTTPS 강제 적용 유무 및 일반적인 성능 지표를 분석합니다. 자동화된 AI 스타일 분석 결과를 제공하며, 스캔 결과에 따른 맞춤형 보안 학습 모듈을 추천합니다.
 
